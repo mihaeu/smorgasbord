@@ -1044,10 +1044,16 @@
     const values = {
         1: "yes",
         2: "maybe",
-        3: "maybe-future",
-        4: "talk",
-        5: "definitely-no",
+        3: "no",
     }
+
+    // const values = {
+    //     1: "yes",
+    //     2: "maybe",
+    //     3: "maybe-future",
+    //     4: "talk",
+    //     5: "definitely-no",
+    // }
 
     const name = window.localStorage.getItem("name");
     if (name && name.length > 0) {
@@ -1074,10 +1080,8 @@
     <blockquote>${item.description}</blockquote>
     <p>
         <label for="${item.id}-yes"><input type="radio" name="${item.id}" id="${item.id}-yes" value="1" ${savedValues[item.id] === "1" && `checked`}/> Yes</label>
-        <label for="${item.id}-maybe"><input type="radio" name="${item.id}" id="${item.id}-maybe" value="2" ${savedValues[item.id] === "2" && `checked`}/> Maybe</label>
-        <label for="${item.id}-maybe-future"><input type="radio" name="${item.id}" id="${item.id}-maybe-future" value="3" ${savedValues[item.id] === "3" && `checked`}/> Maybe in the future</label>
-        <label for="${item.id}-talk"><input type="radio" name="${item.id}" id="${item.id}-talk" value="4" ${savedValues[item.id] === "4" && `checked`}/> Let's talk</label>
-        <label for="${item.id}-definitely-no"><input type="radio" name="${item.id}" id="${item.id}-definitely-no" value="5" ${savedValues[item.id] === "5" && `checked`}/> Definitely no</label>
+        <label for="${item.id}-maybe"><input type="radio" name="${item.id}" id="${item.id}-maybe" value="2" ${savedValues[item.id] === "2" && `checked`}/> Maybe, Let's Talk</label>
+        <label for="${item.id}-no"><input type="radio" name="${item.id}" id="${item.id}-no" value="3" ${savedValues[item.id] === "3" && `checked`}/> No</label>
     </p>
 </section>`)
         }
@@ -1118,8 +1122,20 @@
         console.log(filledInContent);
         if (Object.keys(sharedContent).join() !== Object.keys(filledInContent).join()) {
             alert("Fill in all the subjects which where shared with you.")
+            return
         }
 
+        const rowColor = (yours, theirs) => {
+            if (yours === "yes" && theirs === "yes") {
+                return 'limegreen'
+            }
+
+            if (`${yours}${theirs}`.match(/(yesmaybe|maybeyes|maybemaybe)/)) {
+                return 'yellow'
+            }
+
+            return 'inherit'
+        }
         let content = [`<table>
     <thead>
     <tr>
@@ -1134,7 +1150,7 @@
                 if (!item) {
                     continue
                 }
-                content.push(`<tr ${values[sharedContent[item.id]] === "yes" && values[filledInContent[item.id]] === "yes" ? `style="background-color:limegreen;"` : ''}>
+                content.push(`<tr style="background-color:${rowColor(values[sharedContent[item.id]], values[filledInContent[item.id]])};">
     <td>${category}</td>
     <td>${item.subject}</td>
     <td>${values[sharedContent[item.id]]}</td>
