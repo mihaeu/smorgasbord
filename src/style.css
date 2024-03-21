@@ -1,0 +1,8 @@
+#share-link, #result {
+    padding: 5px;
+    border: 1px solid darkgray;
+    background-color: lightgray;
+    margin: 15px auto 0;
+    display: none;
+    overflow-wrap: anywhere;
+}
