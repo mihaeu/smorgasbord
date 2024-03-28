@@ -127,40 +127,44 @@ export class MainController implements Controller {
 
             const rowColor = (yours: string, theirs: string) => {
                 if (yours === "yes" && theirs === "yes") {
-                    return 'limegreen'
+                    return 'full-match'
                 }
 
                 if (`${yours}${theirs}`.match(/(yesmaybe|maybeyes|maybemaybe)/)) {
-                    return 'yellow'
+                    return 'partial-match'
                 }
 
-                return 'inherit'
+                return ''
             }
-            let content = [`<table>
-    <thead>
-    <tr>
-        <th>Category</th>
-        <th>Subject</th>
-        <th>You</th>
-        <th>Them</th>
-    </tr>
-</thead><tbody>`]
+            const tbody = el('tbody')
+            const table = el('table', {id:'compare-table'},
+                el('thead', {},
+                    el('tr', {},
+                        el('th', {}, t('Category')),
+                        el('th', {}, t('Subject')),
+                        el('th', {}, t('You')),
+                        el('th', {}, t('Them')),
+                        )
+                ), tbody
+            )
             const sharedContent = this.model.sharedSubjects
             for (const category of this.model.categories()) {
                 for (const item of this.model.subjectsByCategory(category)) {
                     if (!item) {
                         continue
                     }
-                    content.push(`<tr style="background-color:${rowColor(this.model.values[sharedContent[item.id]], this.model.values[this.model.subject(item.id) ?? ""])};">
-    <td>${category}</td>
-    <td>${item.subject}</td>
-    <td>${this.model.values[sharedContent[item.id]] ?? "n/a"}</td>
-    <td>${this.model.values[this.model.subject(item.id) ?? ""] ?? "n/a"}</td>
-</tr>`)
+                    const yours = this.model.values[this.model.subject(item.id) ?? ""]
+                    const theirs = this.model.values[sharedContent[item.id]]
+                    const row = el('tr', {class: rowColor(yours, theirs)},
+                        el('td', {}, t(category)),
+                        el('td', {}, t(item.subject)),
+                        el('td', {}, t(yours ?? "n/a")),
+                        el('td', {}, t(theirs ?? "n/a")),
+                    )
+                    tbody.append(row)
                 }
             }
-            content.push(`</tbody></table>`)
-            result.innerHTML = content.join("\n")
+            result.append(table)
             result.style.display = "block";
         })
 

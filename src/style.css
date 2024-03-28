@@ -6,3 +6,11 @@
     display: none;
     overflow-wrap: anywhere;
 }
+
+#compare-table tr.full-match {
+    background-color: limegreen;
+}
+
+#compare-table tr.partial-match {
+    background-color: yellow;
+}
