@@ -2,6 +2,7 @@ import {Controller} from "./controller.ts";
 import './style.css'
 import {el, t} from "./util.ts";
 import {Model} from "./model.ts";
+import {MainView} from "./mainView.ts";
 
 export class MainController implements Controller {
     constructor(private readonly model: Model) {
@@ -21,61 +22,55 @@ export class MainController implements Controller {
         const smorgasbordForm = el('form', {id: "smorgasbord-form"})
         const smorgasbordCategoriesContainer = el('section', {id: 'smorgasbord'}, smorgasbordForm)
 
+        const saveChanges = (event: Event) => {
+            const target = event.target as HTMLInputElement;
+            if (target !== null) {
+                this.model.subject(target.name, target.value);
+            }
+        }
+        smorgasbordForm.addEventListener("change", saveChanges)
+
         for (const category of this.model.categories()) {
-            const categoryContainer = document.createElement('section')
-            const categoryHeading = document.createElement("h1")
-            categoryHeading.innerText = category
+            const categoryContainer = el('section')
+            const categoryHeading = el("h1", {}, t(category))
+            categoryContainer.append(categoryHeading)
             this.model.subjectsByCategory(category).forEach((item) => {
                 if (!item) return;
-                const sectionContainer = document.createElement('section')
-                const sectionHeading = document.createElement("h2")
-                sectionHeading.innerText = item.subject
+                const sectionContainer = el('section')
+                const sectionHeading = el("h2", {}, t(item.subject))
+                const descriptionBlock = el('blockquote', {}, t(item.description))
 
-                const descriptionBlock = document.createElement('blockquote')
-                descriptionBlock.innerText = item.description
-
-                const saveChanges = (event: Event) => {
-                    const target = event.target as HTMLInputElement;
-                    if (target !== null) {
-                        this.model.subject(target.name, target.value);
-                    }
-                }
-                const labelContainer = document.createElement('p')
-
-                const yesLabel = document.createElement('label')
-                const yesOptionInput = document.createElement('input')
-                yesOptionInput.type = "radio"
-                yesOptionInput.name = item.id
-                yesOptionInput.id = item.id + '-yes'
-                yesOptionInput.value = "1"
-                yesOptionInput.checked = this.model.subject(item.id) === "1"
-                yesOptionInput.addEventListener("change", saveChanges)
+                const yesLabel = el('label')
+                const yesOptionInput = el('input', {
+                    type: "radio",
+                    name: item.id,
+                    id: item.id + '-yes',
+                    value: "1",
+                    checked: this.model.subject(item.id) === "1",
+                })
                 yesLabel.append(yesOptionInput, document.createTextNode(' Yes'))
 
-                const maybeLabel = document.createElement('label')
-                const maybeOptionInput = document.createElement('input')
-                maybeOptionInput.type = "radio"
-                maybeOptionInput.name = item.id
-                maybeOptionInput.id = item.id + '-maybe'
-                maybeOptionInput.value = "2"
-                maybeOptionInput.checked = this.model.subject(item.id) === "2"
-                maybeOptionInput.addEventListener("change", saveChanges)
+                const maybeLabel = el('label')
+                const maybeOptionInput = el('input', {
+                    type: "radio",
+                    name: item.id,
+                    id: item.id + '-maybe',
+                    value: "2",
+                    checked: this.model.subject(item.id) === "2",
+                })
                 maybeLabel.append(maybeOptionInput, document.createTextNode(` Maybe, Let's Talk`))
 
-                const noLabel = document.createElement('label')
-                const noOptionInput = document.createElement('input')
-                noOptionInput.type = "radio"
-                noOptionInput.name = item.id
-                noOptionInput.id = item.id + '-no'
-                noOptionInput.value = "3"
-                noOptionInput.checked = this.model.subject(item.id) === "3"
-                noOptionInput.addEventListener("change", saveChanges)
+                const noLabel = el('label')
+                const noOptionInput = el('input', {
+                    type: "radio",
+                    name: item.id,
+                    id: item.id + '-no',
+                    value: "3",
+                    checked: this.model.subject(item.id) === "3",
+                })
                 noLabel.append(noOptionInput, document.createTextNode(' No'))
 
-                labelContainer.append(yesLabel, maybeLabel, noLabel)
-
-
-                sectionContainer.append(sectionHeading, descriptionBlock, labelContainer)
+                sectionContainer.append(sectionHeading, descriptionBlock, el('p', {}, yesLabel, maybeLabel, noLabel))
                 categoryContainer.append(sectionContainer)
             })
             smorgasbordForm.append(categoryContainer)
@@ -83,12 +78,11 @@ export class MainController implements Controller {
 
         const footer = el('footer', {}, t('Made with ❤ by '), el('a', {href: 'https://barcelona-polyamory.com'}, t('Barcelona Poly People')))
 
-        return el('section', {}, header, shareButton, compareButton, resetButton, shareLink, result, smorgasbordCategoriesContainer, footer);
+        return el('section', {}, header, shareButton, compareButton, resetButton, shareLink, result, smorgasbordCategoriesContainer, footer, new MainView('test'));
     }
 
     shareButton(shareLink: HTMLElement) {
-        const shareButton = document.createElement('button')
-        shareButton.innerText = 'Share yours'
+        const shareButton = el('button', {}, t('Share yours'))
         shareButton.addEventListener("click", () => {
             const values = this.model.subjects
             const shareString = Object.entries(values).map(x => x.join("")).join("")
@@ -103,8 +97,7 @@ export class MainController implements Controller {
     }
 
     resetButton() {
-        const resetButton = document.createElement('button')
-        resetButton.innerText = 'Reset'
+        const resetButton = el('button', {}, t('Reset'));
         resetButton.addEventListener("click", () => {
             window.localStorage.clear()
             window.location.href = window.location.origin + window.location.pathname;
@@ -113,8 +106,7 @@ export class MainController implements Controller {
     }
 
     compareButton(result: HTMLElement) {
-        const compareButton = document.createElement('button')
-        compareButton.innerText = 'Compare results'
+        const compareButton = el('button', {}, t('Compare results'))
         compareButton.addEventListener("click", () => {
             if (Object.keys(this.model.sharedSubjects).length === 0) {
                 alert("You can only compare your results to what others have sent you.")
